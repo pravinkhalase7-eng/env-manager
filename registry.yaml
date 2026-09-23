@@ -1,0 +1,63 @@
+# Source of truth for public hostnames on the shared Hostinger VPS.
+# Edit here or in the Env Manager UI. Never store secrets.
+
+workspace: /Users/pravinkhalase/Desktop/Pravin/cursor
+vps_ip: 187.127.138.86
+edge:
+  owner: ai-coder
+  container: aicoder-nginx
+  http_port: 80
+  https_port: 443
+  catch_all: reject
+  notes: Only one process may bind host 80/443. Unknown hostnames must 404, never fall through to Byte.
+
+apps:
+  - id: doc-vault
+    title: DocVault
+    folder: doc-vault
+    domains:
+      - docvault.doxstation.com
+    upstream: "host.docker.internal:8088"
+    host_ports: [8088]
+    bind_public_http: false
+    health: /api/v1/health
+    jenkins: doc-vault
+    notes: Private document vault. Docker nginx on 8088; edge proxies the hostname.
+
+  - id: ai-coder
+    title: Byte / AI Coding Tutor
+    folder: ai-coder
+    domains:
+      - play.doxstation.com
+    upstream: frontend:3000
+    host_ports: [80, 443, 3010]
+    bind_public_http: true
+    health: /api/v1/health
+    jenkins: ai-code-player
+    notes: Owns edge 80/443. Must not use server_name "_". Direct UI also on :3010.
+
+  - id: auto-reader
+    title: AI Teacher
+    folder: auto-reader
+    domains:
+      - doxstation.com
+      - www.doxstation.com
+    upstream: "host.docker.internal:3000"
+    api_upstream: "host.docker.internal:8000"
+    host_ports: [3000, 8000]
+    bind_public_http: false
+    health: /api/v1/health
+    jenkins: ai-teacher
+    notes: Do not bind 80. Edge proxies apex to :3000 / :8000.
+
+  - id: short-video-maker
+    title: Short Video Maker
+    folder: short-video-maker
+    domains:
+      - shorts.doxstation.com
+    upstream: "host.docker.internal:3123"
+    host_ports: [3123]
+    bind_public_http: false
+    health: /health
+    jenkins: short-video-maker
+    notes: Do not bind 80. Edge proxies shorts hostname to :3123.

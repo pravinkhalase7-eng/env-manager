@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Env Manager</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div>
+        <p class="kicker">CURSOR / VPS</p>
+        <h1>Env Manager</h1>
+        <p class="sub">
+          One map of domains, ports, and edge nginx so a hostname cannot fall through to the wrong app.
+          Workspace <span class="mono">{{ state.workspace }}</span>
+        </p>
+      </div>
+      <div class="actions">
+        <form method="post" action="/rescan"><button class="ghost" type="submit">Rescan folders</button></form>
+        <a class="btn primary" href="/nginx.conf">Download nginx</a>
+      </div>
+    </header>
+
+    {% if state.conflicts %}
+    <section class="banner {{ 'error' if state.error_count else 'warn' }}">
+      <p>
+        <strong>{{ state.error_count }} blocking</strong>
+        · {{ state.warn_count }} warnings
+      </p>
+      {% for item in state.conflicts %}
+      <p class="mono">[{{ item.level }}] {{ item.code }} — {{ item.detail }}</p>
+      {% endfor %}
+    </section>
+    {% else %}
+    <section class="banner">
+      <p>No collisions in the registry. Keep unknown hosts on a 404 catch-all — never Byte.</p>
+    </section>
+    {% endif %}
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Public hostnames</h2>
+        <table>
+          <thead>
+            <tr><th>Domain</th><th>App</th><th>Upstream</th><th>Bind 80?</th></tr>
+          </thead>
+          <tbody>
+            {% for app in state.apps %}
+              {% for domain in app.domains %}
+              <tr>
+                <td class="mono">{{ domain }}</td>
+                <td>{{ app.title }}</td>
+                <td class="mono">{{ app.upstream }}</td>
+                <td>
+                  {% if app.bind_public_http %}
+                  <span class="pill warn">EDGE</span>
+                  {% else %}
+                  <span class="pill ok">NO</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <h2>Host ports</h2>
+        <table>
+          <thead>
+            <tr><th>App</th><th>Claimed</th><th>Compose scan</th></tr>
+          </thead>
+          <tbody>
+            {% for app in state.apps %}
+            <tr>
+              <td>{{ app.title }}<div class="mono" style="color:var(--muted)">{{ app.folder }}</div></td>
+              <td class="mono">{{ app.host_ports | join(', ') }}</td>
+              <td class="mono">
+                {% if app.scan.exists %}{{ app.scan.compose_ports | join(', ') or '—' }}{% else %}missing folder{% endif %}
+                {% if app.scan.default_server %}<div><span class="pill bad">default_server _</span></div>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <div class="grid" style="margin-top:16px">
+      <section class="panel">
+        <h2>registry.yaml</h2>
+        <form method="post" action="/api/registry" id="yaml-form">
+          <textarea name="yaml_text" id="yaml">{{ state.yaml_text }}</textarea>
+        </form>
+        <div class="actions" style="padding:12px">
+          <button class="primary" type="button" id="save">Save registry</button>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Generated edge HTTP</h2>
+        <pre>{{ state.nginx }}</pre>
+      </section>
+    </div>
+
+    <script>
+      document.getElementById("save").addEventListener("click", async () => {
+        const yaml_text = document.getElementById("yaml").value;
+        const res = await fetch("/api/registry", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ yaml_text }),
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          alert(data.error || "Could not save");
+          return;
+        }
+        location.reload();
+      });
+    </script>
+  </body>
+</html>
