@@ -1,0 +1,19 @@
+services:
+  env-manager:
+    image: ${APP_IMAGE:-env-manager:latest}
+    container_name: env-manager
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      CURSOR_WORKSPACE: ${CURSOR_WORKSPACE:-/cursor}
+    volumes:
+      - ${CURSOR_WORKSPACE:-/opt/cursor}:/cursor:ro
+    ports:
+      - "${APP_HOST_PORT:-3050}:3050"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3050/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 8

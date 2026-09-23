@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import yaml
@@ -13,7 +14,7 @@ def load_registry() -> dict:
     data = yaml.safe_load(REGISTRY_PATH.read_text()) or {}
     data.setdefault("apps", [])
     data.setdefault("edge", {})
-    data.setdefault("workspace", str(ROOT.parent))
+    data["workspace"] = os.environ.get("CURSOR_WORKSPACE") or data.get("workspace") or str(ROOT.parent)
     return data
 
 

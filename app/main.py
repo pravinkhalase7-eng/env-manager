@@ -44,6 +44,16 @@ def build_state() -> dict:
     }
 
 
+@app.get("/health")
+async def health():
+    registry = load_registry()
+    return {
+        "status": "ok",
+        "app": "env-manager",
+        "apps": len(registry.get("apps") or []),
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return TEMPLATES.TemplateResponse(request, "index.html", {"state": build_state()})

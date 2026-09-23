@@ -21,6 +21,8 @@ python3 -m venv .venv
 
 Open http://127.0.0.1:3050
 
+Jenkins Pipeline from SCM should use this repo and **Script Path** `Jenkinsfile`. The job publishes the UI on host **3050** (not 80/443).
+
 ## Rules
 
 | Hostname | App | Upstream |

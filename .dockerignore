@@ -1,0 +1,6 @@
+.venv
+__pycache__
+.git
+*.pyc
+generated/*.conf
+.DS_Store
