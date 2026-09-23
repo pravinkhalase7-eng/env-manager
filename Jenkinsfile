@@ -159,7 +159,8 @@ pipeline {
   post {
     success {
       echo "Env Manager ${params.DEPLOY_ENV} build #${env.BUILD_NUMBER} succeeded"
-      echo "UI: http://VPS_IP:${params.APP_HOST_PORT}"
+      echo "UI: https://manager.doxstation.com"
+      echo "Direct: http://187.127.138.86:${params.APP_HOST_PORT}"
     }
     failure {
       echo "Env Manager build #${env.BUILD_NUMBER} failed — check stage logs"

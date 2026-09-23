@@ -19,9 +19,9 @@ python3 -m venv .venv
 ./run.sh
 ```
 
-Open http://127.0.0.1:3050
+Open http://127.0.0.1:3050 locally, or **https://manager.doxstation.com** on the VPS.
 
-Jenkins Pipeline from SCM should use this repo and **Script Path** `Jenkinsfile`. The job publishes the UI on host **3050** (not 80/443).
+Jenkins Pipeline from SCM should use this repo and **Script Path** `Jenkinsfile`. The job publishes the UI on host **3050** (not 80/443). Edge nginx (`aicoder-nginx`) proxies `manager.doxstation.com` to that port.
 
 ## Rules
 
@@ -31,6 +31,7 @@ Jenkins Pipeline from SCM should use this repo and **Script Path** `Jenkinsfile`
 | `play.doxstation.com` | Byte | aicoder frontend |
 | `doxstation.com` | AI Teacher | `:3000` / `:8000` |
 | `shorts.doxstation.com` | Short Video Maker | `:3123` |
+| `manager.doxstation.com` | Env Manager | `:3050` |
 
 - Only **one** app may `bind_public_http`.
 - Other apps publish a high port. Edge nginx proxies the hostname there.

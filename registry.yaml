@@ -61,3 +61,15 @@ apps:
     health: /health
     jenkins: short-video-maker
     notes: Do not bind 80. Edge proxies shorts hostname to :3123.
+
+  - id: env-manager
+    title: Env Manager
+    folder: env-manager
+    domains:
+      - manager.doxstation.com
+    upstream: "host.docker.internal:3050"
+    host_ports: [3050]
+    bind_public_http: false
+    health: /health
+    jenkins: env-manager
+    notes: Do not bind 80. Edge proxies manager hostname to :3050. Direct UI also on :3050.
