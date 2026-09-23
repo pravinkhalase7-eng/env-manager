@@ -17,5 +17,5 @@ RUN mkdir -p /app/generated
 
 ENV PYTHONPATH=/app
 EXPOSE 3050
-HEALTHCHECK --interval=15s --timeout=5s --retries=8 CMD curl -fsS http://127.0.0.1:3050/health
+HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=8 CMD curl -fsS http://127.0.0.1:3050/health
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3050"]

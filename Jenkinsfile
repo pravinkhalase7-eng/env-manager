@@ -130,8 +130,27 @@ pipeline {
           set -e
           echo "=== Container status ==="
           docker compose -f docker-compose.yml ps || true
-          docker exec env-manager curl -fsS http://127.0.0.1:3050/health
-          echo
+          echo "Waiting for Env Manager health..."
+          ready=0
+          i=1
+          while [ "$i" -le 30 ]; do
+            if docker exec env-manager curl -fsS http://127.0.0.1:3050/health >/tmp/env-manager-health.json 2>/dev/null; then
+              echo "healthy after ${i}s"
+              cat /tmp/env-manager-health.json
+              echo
+              ready=1
+              break
+            fi
+            echo "attempt ${i}: uvicorn starting"
+            docker logs env-manager --tail=20 || true
+            i=$((i + 1))
+            sleep 2
+          done
+          if [ "$ready" != "1" ]; then
+            echo "Env Manager did not become healthy"
+            docker logs env-manager --tail=80 || true
+            exit 1
+          fi
         '''
       }
     }
